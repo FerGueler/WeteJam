@@ -105,6 +105,7 @@ public class BlockBehavior : MonoBehaviour
 
         void CheckForBreakers()
         {
+            //quizás esta función debería ser del GameController o algo, pero como tenemos es de q el grid es static, no se
             //loopear por todo el grid y preguntarle a cada pieza sus rules de breakeo (quizás llamarle a una funcion que tiene)
         
         }
