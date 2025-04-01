@@ -105,7 +105,7 @@ public class BlockBehavior : MonoBehaviour
 
         void CheckForBreakers()
         {
-            //loopear por todo el grid y preguntarle a cada pieza sus rules de breakeo (quizás llamarle a una funcion que tiene)s
+            //loopear por todo el grid y preguntarle a cada pieza sus rules de breakeo (quizás llamarle a una funcion que tiene)
         
         }
 
