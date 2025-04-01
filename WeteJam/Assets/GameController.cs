@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+    public GameObject block;
+    private Vector3 spawnPosition = new Vector3 (3,12,0);
+    public void SpawnNewBlock()
+    {
+        Instantiate(block, spawnPosition, Quaternion.identity);
+    }
+
+    /*
     PieceBehaviour[] allPieces;
     bool theresActivePiece = true;
     
@@ -32,5 +40,5 @@ public class GameController : MonoBehaviour
         
     }
 
-
+    */
 }
