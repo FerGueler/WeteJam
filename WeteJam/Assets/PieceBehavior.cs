@@ -4,15 +4,9 @@ using UnityEngine;
 
 public class PieceBehavior : MonoBehaviour
 {
-    public enum PieceType
-    {
-        Kinght,
-        Bishop,
-        Rook,
-        King
-    }
+   
 
-    public PieceType type;
+    public int type; // 0 knight, 1 bishop, 2 rook, 3 queen
 
     // Start is called before the first frame update
     void Start()

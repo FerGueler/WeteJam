@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Unity.VisualScripting.Metadata;
 
 public class BlockBehavior : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class BlockBehavior : MonoBehaviour
     public static int height = 12;
     public static int width = 8;
     public static Transform[,] grid = new Transform[width, height];
+    private List<Transform> toDeleteList = new List<Transform>();   
     //public int pieceType; //0=caballo, 1=alfil ,2=torre, 3= dama
     public enum PieceType
     {
@@ -43,7 +45,7 @@ public class BlockBehavior : MonoBehaviour
                 if (!VaildMove())
                 { transform.position -= new Vector3(1, 0, 0); }
             }
-            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
+            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)|| Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Keypad0))
             {
                 transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
                 if (!VaildMove())
@@ -51,14 +53,21 @@ public class BlockBehavior : MonoBehaviour
             }
         }
 
-        if (Time.time - previousTime > ((Input.GetKey(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) ? quickFallTime : fallTime))
+        if (Time.time - previousTime > ((Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) ? quickFallTime : fallTime))
         {
             transform.position += new Vector3(0, -1, 0);
             if (!VaildMove())
             {
                 transform.position -= new Vector3(0, -1, 0);
-                AddToGrid();
+                do { 
+                CheckForDowners();
+                AddToGrid(transform);
                 CheckForBreakers();
+                 bool seguir=DeleteList();
+
+                } while (seguir)
+
+
 
                 this.enabled = false;
                 FindObjectOfType<GameController>().SpawnNewBlock();
@@ -75,13 +84,14 @@ public class BlockBehavior : MonoBehaviour
         }
     }
 
-    void AddToGrid()
+    void AddToGrid( Transform blockTransform)
     {
-        foreach (Transform children in transform)
+        foreach (Transform children in blockTransform)
         {
             int roundedX = Mathf.RoundToInt(children.transform.position.x);
             int roundedY = Mathf.RoundToInt(children.transform.position.y);
             grid[roundedX, roundedY] = children;
+            children.transform.rotation = Quaternion.identity; 
         }
     }
         bool VaildMove()
@@ -105,12 +115,103 @@ public class BlockBehavior : MonoBehaviour
 
         void CheckForBreakers()
         {
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++) 
+            {
+                if (grid[i, j] != null)
+                {
+                    PieceBehavior pieceBehavior = grid[i, j].gameObject.GetComponent<PieceBehavior>();
+                    if (pieceBehavior.type == 0)
+                    { }
+                    else if (pieceBehavior.type == 1)
+                    {
+                        if ((i + 1 < width && j + 1 < height))
+                        {
+                            if (grid[i + 1, j + 1] != null)
+                            {
+                                if (grid[i + 1, j + 1].gameObject.GetComponent<PieceBehavior>().type == 1)
+                                {
+                                    if  ((i + 2 < width && j + 2 < height))
+                                    {
+                                        if (grid[i + 2, j + 2] != null)
+                                        {
+                                            if (grid[i + 2, j + 2].gameObject.GetComponent<PieceBehavior>().type == 1)
+                                            {
+                                                AddToDeleteList(grid[i, j]);
+                                                AddToDeleteList(grid[i + 1, j + 1]);
+                                                AddToDeleteList(grid[i + 2, j + 2]);
+                                            }
+                                        }
+                                    }
+                                }
+                            } 
+                        }
+                        if  ((i + 1 < width && j - 1 >= 0))
+                        {
+                            if (grid[i + 1, j - 1] != null)
+                            {
+                                if (grid[i + 1, j - 1].gameObject.GetComponent<PieceBehavior>().type == 1)
+                                {
+                                    if ((i + 2 < width && j - 2 >= 0))
+                                    {
+                                        if (grid[i + 2, j - 2] != null)
+                                        {
+                                            if (grid[i + 2, j - 2].gameObject.GetComponent<PieceBehavior>().type == 1)
+                                            {
+                                                AddToDeleteList(grid[i, j]);
+                                                AddToDeleteList(grid[i + 1, j - 1]);
+                                                AddToDeleteList(grid[i + 2, j - 2]);
+                                            }
+                                        } 
+                                    }
+                                }
+                            } 
+                        }
+                    }
+                    else if (pieceBehavior.type == 2)
+                    { }
+                    else if (pieceBehavior.type == 3)
+                    { }
+                }
+            }
+        }
             //quizás esta función debería ser del GameController o algo, pero como tenemos es de q el grid es static, no se
             //loopear por todo el grid y preguntarle a cada pieza sus rules de breakeo (quizás llamarle a una funcion que tiene)
-        
         }
 
+    void AddToDeleteList(Transform toDeleteItem)
+    {
+        toDeleteList.Add(toDeleteItem);               
+    }
 
+    bool DeleteList()
+    { 
+        if(toDeleteList.Count>0)
+        { 
+        for (int i = 0; i < toDeleteList.Count; i++)
+        {
+            int roundedX = Mathf.RoundToInt(toDeleteList[i].transform.position.x);
+            int roundedY = Mathf.RoundToInt(toDeleteList[i].transform.position.y);
+            grid[roundedX, roundedY] = null;
+            Destroy(toDeleteList[i].gameObject);
+        }
+        toDeleteList.Clear();
+            return true;
+        }
+        else { return false; }
+    }
 
+    void CheckForDowners()
+    {
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height-1; j++)
+            {
+                if (grid[i,j] == null)
+                { }
+            }
+        }
+    }
 
 }
