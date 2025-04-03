@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class GameController : MonoBehaviour
 {
     public GameObject block;
-    private Vector3 spawnPosition = new Vector3 (2,11,0);
+    private Vector3 spawnPosition = new Vector3 (2,12,0);
     private Vector3 nextBlockPosition = new Vector3(7, 10, 0);
     public GameObject nextBlock;
     public void SpawnNewBlock()

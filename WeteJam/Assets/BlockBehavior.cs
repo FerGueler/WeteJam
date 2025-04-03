@@ -18,6 +18,7 @@ public class BlockBehavior : MonoBehaviour
     int piecesNumber = 4;
     int colorsNumber = 2;
     bool checkColor = true;
+    bool canMove = true;
     void Start()
     {
         foreach (Transform children in transform)
@@ -32,50 +33,63 @@ public class BlockBehavior : MonoBehaviour
     }
     void Update()
     {
+        if (canMove)
+        {
+            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.Joystick3Button2))
+            {
+                transform.position = transform.position + new Vector3(-1, 0, 0);
+                if (!VaildMove())
+                { transform.position -= new Vector3(-1, 0, 0); }
+            }
+            if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.Joystick3Button1))
+            {
+                transform.position = transform.position + new Vector3(1, 0, 0);
+                if (!VaildMove())
+                { transform.position -= new Vector3(1, 0, 0); }
+            }
+            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Keypad0) || Input.GetKeyDown(KeyCode.Joystick3Button3))
+            {
+                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+                if (!VaildMove())
+                { transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
+            }
 
-        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.Joystick3Button2))
-        {
-            transform.position = transform.position + new Vector3(-1, 0, 0);
-            if (!VaildMove())
-            { transform.position -= new Vector3(-1, 0, 0); }
         }
-        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.Joystick3Button1))
-        {
-            transform.position = transform.position + new Vector3(1, 0, 0);
-            if (!VaildMove())
-            { transform.position -= new Vector3(1, 0, 0); }
-        }
-        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Keypad0) || Input.GetKeyDown(KeyCode.Joystick3Button3))
-        {
-            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
-            if (!VaildMove())
-            { transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
-        }
-
 
         if (Time.time - previousTime > ((Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.Joystick3Button0)) ? quickFallTime : fallTime))
         {
-            bool continueChecking;
+            bool continueCheckingBreakers = false;
+            bool continueCheckingDowners = false;
 
-            transform.position += new Vector3(0, -0.5000001f, 0);
+
+            foreach (Transform children in transform)
+            {
+                int roundedX = Mathf.RoundToInt(children.transform.position.x);
+                int roundedY = Mathf.RoundToInt(children.transform.position.y);
+                if (roundedY>0&&roundedY<height)
+                grid[roundedX, roundedY] = null;
+            }
+            transform.position += new Vector3(0, -1f, 0);
+
             if (!VaildMove())
             {
-                transform.position -= new Vector3(0, -0.5000001f, 0);
+                transform.position -= new Vector3(0, -1f, 0);
                 AddToGridBlock(transform);
-                do
+                canMove = false;
+                continueCheckingDowners = CheckForDowners();
+
+                if (!continueCheckingDowners)
                 {
-                    for (int i = 0; i < height; i++)
-                    {
-                        CheckForDowners();
-                    }
                     CheckForBreakers();
-                    continueChecking = DeleteList();
-                } while (continueChecking);
+                    continueCheckingBreakers = DeleteList();
+                }
 
 
-
-                this.enabled = false;
-                FindObjectOfType<GameController>().SpawnNewBlock();
+                if (!continueCheckingDowners && !continueCheckingBreakers)
+                {
+                    this.enabled = false;
+                    FindObjectOfType<GameController>().SpawnNewBlock();
+                }
             }
             previousTime = Time.time;
         }
@@ -101,19 +115,22 @@ public class BlockBehavior : MonoBehaviour
     }
 
     bool VaildMove()
-    {
-        foreach (Transform children in transform)
+    { if (transform.childCount == 0) { return false; }
+        else
         {
-            int roundedX = Mathf.RoundToInt(children.transform.position.x);
-            int roundedY = Mathf.RoundToInt(children.transform.position.y);
+            foreach (Transform children in transform)
+            {
+                int roundedX = Mathf.RoundToInt(children.transform.position.x);
+                int roundedY = Mathf.RoundToInt(children.transform.position.y);
 
-            if (roundedX < 0 || roundedX >= width || roundedY < 0 || roundedY >= height)
-            {
-                return false;
-            }
-            if (grid[roundedX, roundedY] != null)
-            {
-                return false;
+                if (roundedX < 0 || roundedX >= width || roundedY < 0 || roundedY >= height)
+                {
+                    return false;
+                }
+                if (grid[roundedX, roundedY] != null)
+                {
+                    return false;
+                }
             }
         }
         return true;
@@ -717,6 +734,14 @@ public class BlockBehavior : MonoBehaviour
                 int roundedY = Mathf.RoundToInt(toDeleteList[i].transform.position.y);
                 grid[roundedX, roundedY] = null;
                 Destroy(toDeleteList[i].gameObject);
+                
+                if(transform.childCount>0)
+                {
+                    foreach (Transform children in transform)
+                    { 
+                        children.SetParent(null);
+                    }
+                }
 
             }
             toDeleteList.Clear();
@@ -725,8 +750,9 @@ public class BlockBehavior : MonoBehaviour
         else { return false; }
     }
 
-    void CheckForDowners()
+    bool CheckForDowners()
     {
+        bool mustContinue = false;
         for (int i = 0; i < width; i++)
         {
             for (int j = 1; j < height; j++)
@@ -742,12 +768,14 @@ public class BlockBehavior : MonoBehaviour
                     {
                         AddToGridPiece(grid[i, j]);
                         grid[i, j] = null;
+                        mustContinue = true;
                     }
-
                 }
             }
         }
+        return mustContinue;
     }
+
 
 
     bool ValidMoveAutomatic(Transform toCheckItem)
