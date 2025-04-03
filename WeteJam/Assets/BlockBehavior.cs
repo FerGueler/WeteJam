@@ -57,10 +57,10 @@ public class BlockBehavior : MonoBehaviour
         {
             bool continueChecking;
 
-            transform.position += new Vector3(0, -1, 0);
+            transform.position += new Vector3(0, -0.000001f, 0);
             if (!VaildMove())
             {
-                transform.position -= new Vector3(0, -1, 0);
+                transform.position -= new Vector3(0, -0.5000001f, 0);
                 AddToGridBlock(transform);
                 do
                 {
