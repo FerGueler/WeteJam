@@ -720,7 +720,6 @@ public class BlockBehavior : MonoBehaviour
 
             }
             toDeleteList.Clear();
-            StartCoroutine(WaitCoroutine());
             return true;
         }
         else { return false; }
@@ -777,10 +776,5 @@ public class BlockBehavior : MonoBehaviour
         (grid1.gameObject.GetComponent<PieceBehavior>().color == 99 || grid2.gameObject.GetComponent<PieceBehavior>().color == 99))
         { return true; }
         else return false;
-    }
-
-    IEnumerator WaitCoroutine()
-    {
-        yield return new WaitForSeconds(2f);
     }
 }
