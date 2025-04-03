@@ -55,6 +55,10 @@ MonoBehaviour:
   - {fileID: 1678319458, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
   - {fileID: 1597095886, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
   - {fileID: 1215731320, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
+  - {fileID: -1371138668, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
+  - {fileID: -1926397826, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
+  - {fileID: -1756572311, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
+  - {fileID: -783707394, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
   isInitialBlock: 0
 --- !u!1001 &1510721620384781949
 PrefabInstance:

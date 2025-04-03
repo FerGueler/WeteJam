@@ -15,42 +15,45 @@ public class BlockBehavior : MonoBehaviour
     public static Transform[,] grid = new Transform[width, height];
     private List<Transform> toDeleteList = new List<Transform>();
     public bool isInitialBlock;
+    int piecesNumber = 4;
+    int colorsNumber = 2;
+    bool checkColor = true;
     void Start()
     {
         foreach (Transform children in transform)
         {
-            int r = Random.Range(0, 4);
+            int r = Random.Range(0, piecesNumber);
             children.GetComponent<PieceBehavior>().type = r;
-            children.GetComponent<SpriteRenderer>().sprite = spriteList[r];
+            int c = Random.Range(0, colorsNumber);
+            children.GetComponent<PieceBehavior>().color = c;
+            children.GetComponent<SpriteRenderer>().sprite = spriteList[r + piecesNumber * c];
         }
-        if(!isInitialBlock) this.enabled = false;
+        if (!isInitialBlock) this.enabled = false;
     }
-
-    // Update is called once per frame
     void Update()
     {
-        
-            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.Joystick1Button2))
-            {
-                transform.position = transform.position + new Vector3(-1, 0, 0);
-                if (!VaildMove())
-                { transform.position -= new Vector3(-1, 0, 0); }
-            }
-            if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.Joystick1Button1))
-            {
-                transform.position = transform.position + new Vector3(1, 0, 0);
-                if (!VaildMove())
-                { transform.position -= new Vector3(1, 0, 0); }
-            }
-            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Keypad0) || Input.GetKeyDown(KeyCode.Joystick1Button3))
-            {
-                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
-                if (!VaildMove())
-                { transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
-            }
-        
 
-        if (Time.time - previousTime > ((Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.Joystick1Button0)) ? quickFallTime : fallTime))
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.Joystick3Button2))
+        {
+            transform.position = transform.position + new Vector3(-1, 0, 0);
+            if (!VaildMove())
+            { transform.position -= new Vector3(-1, 0, 0); }
+        }
+        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.Joystick3Button1))
+        {
+            transform.position = transform.position + new Vector3(1, 0, 0);
+            if (!VaildMove())
+            { transform.position -= new Vector3(1, 0, 0); }
+        }
+        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Keypad0) || Input.GetKeyDown(KeyCode.Joystick3Button3))
+        {
+            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+            if (!VaildMove())
+            { transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
+        }
+
+
+        if (Time.time - previousTime > ((Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.Joystick3Button0)) ? quickFallTime : fallTime))
         {
             bool continueChecking;
 
@@ -61,12 +64,12 @@ public class BlockBehavior : MonoBehaviour
                 AddToGridBlock(transform);
                 do
                 {
-                for (int i = 0; i < height; i++)
-                {
-                    CheckForDowners();
-                }
-                CheckForBreakers();
-                continueChecking = DeleteList();
+                    for (int i = 0; i < height; i++)
+                    {
+                        CheckForDowners();
+                    }
+                    CheckForBreakers();
+                    continueChecking = DeleteList();
                 } while (continueChecking);
 
 
@@ -90,11 +93,11 @@ public class BlockBehavior : MonoBehaviour
     void AddToGridPiece(Transform blockTransform)
     {
 
-            int roundedX = Mathf.RoundToInt(blockTransform.transform.position.x);
-            int roundedY = Mathf.RoundToInt(blockTransform.transform.position.y);
-            grid[roundedX, roundedY] = blockTransform;
-            blockTransform.rotation = Quaternion.identity;
-        
+        int roundedX = Mathf.RoundToInt(blockTransform.transform.position.x);
+        int roundedY = Mathf.RoundToInt(blockTransform.transform.position.y);
+        grid[roundedX, roundedY] = blockTransform;
+        blockTransform.rotation = Quaternion.identity;
+
     }
 
     bool VaildMove()
@@ -247,9 +250,15 @@ public class BlockBehavior : MonoBehaviour
                                         {
                                             if (grid[i + 2, j + 2].gameObject.GetComponent<PieceBehavior>().type == 1)
                                             {
-                                                AddToDeleteList(grid[i, j]);
-                                                AddToDeleteList(grid[i + 1, j + 1]);
-                                                AddToDeleteList(grid[i + 2, j + 2]);
+                                                if (
+                                                    CompareColor(grid[i, j], grid[i + 1, j + 1], checkColor) &&
+                                                    CompareColor(grid[i + 2, j + 2], grid[i + 1, j + 1], checkColor) &&
+                                                    CompareColor(grid[i, j], grid[i + 2, j + 2], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i + 1, j + 1]);
+                                                    AddToDeleteList(grid[i + 2, j + 2]);
+                                                }
                                             }
                                         }
                                     }
@@ -268,9 +277,14 @@ public class BlockBehavior : MonoBehaviour
                                         {
                                             if (grid[i + 2, j - 2].gameObject.GetComponent<PieceBehavior>().type == 1)
                                             {
-                                                AddToDeleteList(grid[i, j]);
-                                                AddToDeleteList(grid[i + 1, j - 1]);
-                                                AddToDeleteList(grid[i + 2, j - 2]);
+                                                if (CompareColor(grid[i, j], grid[i + 1, j - 1], checkColor) &&
+                                                    CompareColor(grid[i + 2, j - 2], grid[i + 1, j - 1], checkColor) &&
+                                                    CompareColor(grid[i, j], grid[i + 2, j - 2], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i + 1, j - 1]);
+                                                    AddToDeleteList(grid[i + 2, j - 2]);
+                                                }
                                             }
                                         }
                                     }
@@ -290,11 +304,16 @@ public class BlockBehavior : MonoBehaviour
                                     {
                                         if (grid[i + 2, j] != null)
                                         {
-                                            if (grid[i + 2,j].gameObject.GetComponent<PieceBehavior>().type == 2)
+                                            if (grid[i + 2, j].gameObject.GetComponent<PieceBehavior>().type == 2)
                                             {
-                                                AddToDeleteList(grid[i, j]);
-                                                AddToDeleteList(grid[i + 1, j]);
-                                                AddToDeleteList(grid[i + 2, j]);
+                                                if (CompareColor(grid[i, j], grid[i + 1, j], checkColor) &&
+                                                    CompareColor(grid[i + 2, j], grid[i, j], checkColor) &&
+                                                    CompareColor(grid[i + 1, j], grid[i + 2, j], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i + 1, j]);
+                                                    AddToDeleteList(grid[i + 2, j]);
+                                                }
                                             }
                                         }
                                     }
@@ -313,9 +332,16 @@ public class BlockBehavior : MonoBehaviour
                                         {
                                             if (grid[i, j + 2].gameObject.GetComponent<PieceBehavior>().type == 2)
                                             {
-                                                AddToDeleteList(grid[i, j]);
-                                                AddToDeleteList(grid[i, j + 1]);
-                                                AddToDeleteList(grid[i, j + 2]);
+                                                if (CompareColor(grid[i, j], grid[i, j + 1], checkColor) &&
+                                                   CompareColor(grid[i, j], grid[i, j + 2], checkColor) &&
+                                                   CompareColor(grid[i, j + 1], grid[i, j + 2], checkColor))
+                                                {
+                                                    {
+                                                        AddToDeleteList(grid[i, j]);
+                                                        AddToDeleteList(grid[i, j + 1]);
+                                                        AddToDeleteList(grid[i, j + 2]);
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -337,9 +363,14 @@ public class BlockBehavior : MonoBehaviour
                                         {
                                             if (grid[i + 2, j + 2].gameObject.GetComponent<PieceBehavior>().type == 3)
                                             {
-                                                AddToDeleteList(grid[i, j]);
-                                                AddToDeleteList(grid[i + 1, j + 1]);
-                                                AddToDeleteList(grid[i + 2, j + 2]);
+                                                if (CompareColor(grid[i, j], grid[i + 1, j + 1], checkColor) &&
+                                                   CompareColor(grid[i, j], grid[i + 2, j + 2], checkColor) &&
+                                                   CompareColor(grid[i + 1, j + 1], grid[i + 2, j + 2], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i + 1, j + 1]);
+                                                    AddToDeleteList(grid[i + 2, j + 2]);
+                                                }
                                             }
                                         }
                                     }
@@ -358,9 +389,14 @@ public class BlockBehavior : MonoBehaviour
                                         {
                                             if (grid[i + 2, j - 2].gameObject.GetComponent<PieceBehavior>().type == 3)
                                             {
-                                                AddToDeleteList(grid[i, j]);
-                                                AddToDeleteList(grid[i + 1, j - 1]);
-                                                AddToDeleteList(grid[i + 2, j - 2]);
+                                                if (CompareColor(grid[i, j], grid[i + 1, j - 1], checkColor) &&
+                                                   CompareColor(grid[i, j], grid[i + 2, j - 2], checkColor) &&
+                                                   CompareColor(grid[i + 1, j - 1], grid[i + 2, j - 2], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i + 1, j - 1]);
+                                                    AddToDeleteList(grid[i + 2, j - 2]);
+                                                }
                                             }
                                         }
                                     }
@@ -379,9 +415,14 @@ public class BlockBehavior : MonoBehaviour
                                         {
                                             if (grid[i + 2, j].gameObject.GetComponent<PieceBehavior>().type == 3)
                                             {
-                                                AddToDeleteList(grid[i, j]);
-                                                AddToDeleteList(grid[i + 1, j]);
-                                                AddToDeleteList(grid[i + 2, j]);
+                                                if (CompareColor(grid[i, j], grid[i + 1, j], checkColor) &&
+                                                   CompareColor(grid[i, j], grid[i + 2, j], checkColor) &&
+                                                   CompareColor(grid[i + 1, j], grid[i + 2, j], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i + 1, j]);
+                                                    AddToDeleteList(grid[i + 2, j]);
+                                                }
                                             }
                                         }
                                     }
@@ -400,9 +441,14 @@ public class BlockBehavior : MonoBehaviour
                                         {
                                             if (grid[i, j + 2].gameObject.GetComponent<PieceBehavior>().type == 3)
                                             {
-                                                AddToDeleteList(grid[i, j]);
-                                                AddToDeleteList(grid[i, j + 1]);
-                                                AddToDeleteList(grid[i, j + 2]);
+                                                if (CompareColor(grid[i, j], grid[i, j + 1], checkColor) &&
+                                                   CompareColor(grid[i, j], grid[i, j + 2], checkColor) &&
+                                                   CompareColor(grid[i, j + 1], grid[i, j + 2], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i, j + 1]);
+                                                    AddToDeleteList(grid[i, j + 2]);
+                                                }
                                             }
                                         }
                                     }
@@ -410,6 +456,81 @@ public class BlockBehavior : MonoBehaviour
                             }
                         }
                     }
+                    else if (pieceBehavior.type == 4)
+                    {
+                        if (i + 1 < width)
+                        {
+                            if (grid[i + 1, j] != null)
+                            {
+                                if (grid[i + 1, j].gameObject.GetComponent<PieceBehavior>().type == 4)
+                                {
+                                    if (j + 1 < height)
+                                    {
+                                        if (grid[i + 1, j + 1] != null)
+                                        {
+                                            if (grid[i + 1, j+1].gameObject.GetComponent<PieceBehavior>().type == 4)
+                                            {
+                                                if (CompareColor(grid[i, j], grid[i + 1, j+1], checkColor) &&
+                                                    CompareColor(grid[i + 1, j], grid[i, j], checkColor) &&
+                                                    CompareColor(grid[i + 1, j], grid[i + 1, j+1], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i + 1, j]);
+                                                    AddToDeleteList(grid[i + 1, j + 1]);
+                                                }
+                                            }
+                                        }
+                                        if (grid[i, j + 1] != null)
+                                        {
+                                            if (grid[i, j + 1].gameObject.GetComponent<PieceBehavior>().type == 4)
+                                            {
+                                                if (CompareColor(grid[i, j], grid[i, j + 1], checkColor) &&
+                                                    CompareColor(grid[i + 1, j], grid[i, j], checkColor) &&
+                                                    CompareColor(grid[i + 1, j], grid[i, j + 1], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i + 1, j]);
+                                                    AddToDeleteList(grid[i, j + 1]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (j - 1 >= 0)
+                                    {
+                                        if (grid[i + 1, j - 1] != null)
+                                        {
+                                            if (grid[i + 1, j - 1].gameObject.GetComponent<PieceBehavior>().type == 4)
+                                            {
+                                                if (CompareColor(grid[i, j], grid[i + 1, j - 1], checkColor) &&
+                                                    CompareColor(grid[i + 1, j], grid[i, j], checkColor) &&
+                                                    CompareColor(grid[i + 1, j], grid[i + 1, j - 1], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i + 1, j]);
+                                                    AddToDeleteList(grid[i + 1, j - 1]);
+                                                }
+                                            }
+                                        }
+                                        if (grid[i, j - 1] != null)
+                                        {
+                                            if (grid[i, j - 1].gameObject.GetComponent<PieceBehavior>().type == 4)
+                                            {
+                                                if (CompareColor(grid[i, j], grid[i, j - 1], checkColor) &&
+                                                    CompareColor(grid[i + 1, j], grid[i, j], checkColor) &&
+                                                    CompareColor(grid[i + 1, j], grid[i, j - 1], checkColor))
+                                                {
+                                                    AddToDeleteList(grid[i, j]);
+                                                    AddToDeleteList(grid[i + 1, j]);
+                                                    AddToDeleteList(grid[i, j - 1]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 }
             }
         }
@@ -422,9 +543,9 @@ public class BlockBehavior : MonoBehaviour
         toDeleteList.Add(toDeleteItem);
     }
 
-    void Check7KnightJumps (int x, int y, int x_prev, int y_prev)
+    void Check7KnightJumps(int x, int y, int x_prev, int y_prev)
     {
-        if(-x!=1||-y!=2)
+        if (-x != 1 || -y != 2)
         {
             if ((x + x_prev + 1 < width && y + y_prev + 2 < height))
             {
@@ -432,12 +553,17 @@ public class BlockBehavior : MonoBehaviour
                 {
                     if (grid[x + x_prev + 1, y + y_prev + 2].gameObject.GetComponent<PieceBehavior>().type == 0)
                     {
-                        AddToDeleteList(grid[x + x_prev, y + y_prev]);
-                        AddToDeleteList(grid[x + x_prev + 1, y + y_prev + 2]);
-                        AddToDeleteList(grid[x_prev, y_prev]);
+                        if (CompareColor(grid[x + x_prev, y + y_prev], grid[x + x_prev + 1, y + y_prev + 2], checkColor) &&
+                            CompareColor(grid[x + x_prev, y + y_prev], grid[x_prev, y_prev], checkColor) &&
+                            CompareColor(grid[x + x_prev + 1, y + y_prev + 2], grid[x_prev, y_prev], checkColor))
+                        {
+                            AddToDeleteList(grid[x + x_prev, y + y_prev]);
+                            AddToDeleteList(grid[x + x_prev + 1, y + y_prev + 2]);
+                            AddToDeleteList(grid[x_prev, y_prev]); 
+                        }
                     }
                 }
-            } 
+            }
         }
         if (-x != 2 || -y != 1)
         {
@@ -447,9 +573,14 @@ public class BlockBehavior : MonoBehaviour
                 {
                     if (grid[x + x_prev + 2, y + y_prev + 1].gameObject.GetComponent<PieceBehavior>().type == 0)
                     {
-                        AddToDeleteList(grid[x + x_prev, y + y_prev]);
-                        AddToDeleteList(grid[x + x_prev + 2, y + y_prev + 1]);
-                        AddToDeleteList(grid[x_prev, y_prev]);
+                        if (CompareColor(grid[x + x_prev, y + y_prev], grid[x + x_prev + 2, y + y_prev + 1], checkColor) &&
+                            CompareColor(grid[x + x_prev, y + y_prev], grid[x_prev, y_prev], checkColor) &&
+                            CompareColor(grid[x + x_prev + 2, y + y_prev + 1], grid[x_prev, y_prev], checkColor))
+                        {
+                            AddToDeleteList(grid[x + x_prev, y + y_prev]);
+                            AddToDeleteList(grid[x + x_prev + 2, y + y_prev + 1]);
+                            AddToDeleteList(grid[x_prev, y_prev]); 
+                        }
                     }
                 }
             }
@@ -462,9 +593,14 @@ public class BlockBehavior : MonoBehaviour
                 {
                     if (grid[x + x_prev + 2, y + y_prev + -1].gameObject.GetComponent<PieceBehavior>().type == 0)
                     {
-                        AddToDeleteList(grid[x + x_prev, y + y_prev]);
-                        AddToDeleteList(grid[x + x_prev + 2, y + y_prev + -1]);
-                        AddToDeleteList(grid[x_prev, y_prev]);
+                        if (CompareColor(grid[x + x_prev, y + y_prev], grid[x + x_prev + 2, y + y_prev - 1], checkColor) &&
+                            CompareColor(grid[x + x_prev, y + y_prev], grid[x_prev, y_prev], checkColor) &&
+                            CompareColor(grid[x + x_prev + 2, y + y_prev - 1], grid[x_prev, y_prev], checkColor))
+                        {
+                            AddToDeleteList(grid[x + x_prev, y + y_prev]);
+                            AddToDeleteList(grid[x + x_prev + 2, y + y_prev + -1]);
+                            AddToDeleteList(grid[x_prev, y_prev]); 
+                        }
                     }
                 }
             }
@@ -477,9 +613,14 @@ public class BlockBehavior : MonoBehaviour
                 {
                     if (grid[x + x_prev + 1, y + y_prev + -2].gameObject.GetComponent<PieceBehavior>().type == 0)
                     {
-                        AddToDeleteList(grid[x + x_prev, y + y_prev]);
-                        AddToDeleteList(grid[x + x_prev + 1, y + y_prev + -2]);
-                        AddToDeleteList(grid[x_prev, y_prev]);
+                        if (CompareColor(grid[x + x_prev, y + y_prev], grid[x + x_prev + 1, y + y_prev - 2], checkColor) &&
+                            CompareColor(grid[x + x_prev, y + y_prev], grid[x_prev, y_prev], checkColor) &&
+                            CompareColor(grid[x + x_prev + 1, y + y_prev - 2], grid[x_prev, y_prev], checkColor))
+                        {
+                            AddToDeleteList(grid[x + x_prev, y + y_prev]);
+                            AddToDeleteList(grid[x + x_prev + 1, y + y_prev + -2]);
+                            AddToDeleteList(grid[x_prev, y_prev]); 
+                        }
                     }
                 }
             }
@@ -492,9 +633,14 @@ public class BlockBehavior : MonoBehaviour
                 {
                     if (grid[x + x_prev + -1, y + y_prev + -2].gameObject.GetComponent<PieceBehavior>().type == 0)
                     {
-                        AddToDeleteList(grid[x + x_prev, y + y_prev]);
-                        AddToDeleteList(grid[x + x_prev + -1, y + y_prev + -2]);
-                        AddToDeleteList(grid[x_prev, y_prev]);
+                        if (CompareColor(grid[x + x_prev, y + y_prev], grid[x + x_prev - 1, y + y_prev - 2], checkColor) &&
+                            CompareColor(grid[x + x_prev, y + y_prev], grid[x_prev, y_prev], checkColor) &&
+                            CompareColor(grid[x + x_prev - 1, y + y_prev - 2], grid[x_prev, y_prev], checkColor))
+                        {
+                            AddToDeleteList(grid[x + x_prev, y + y_prev]);
+                            AddToDeleteList(grid[x + x_prev + -1, y + y_prev + -2]);
+                            AddToDeleteList(grid[x_prev, y_prev]); 
+                        }
                     }
                 }
             }
@@ -507,9 +653,14 @@ public class BlockBehavior : MonoBehaviour
                 {
                     if (grid[x + x_prev + -2, y + y_prev + -1].gameObject.GetComponent<PieceBehavior>().type == 0)
                     {
-                        AddToDeleteList(grid[x + x_prev, y + y_prev]);
-                        AddToDeleteList(grid[x + x_prev + -2, y + y_prev + -1]);
-                        AddToDeleteList(grid[x_prev, y_prev]);
+                        if (CompareColor(grid[x + x_prev, y + y_prev], grid[x + x_prev - 2, y + y_prev - 1], checkColor) &&
+                            CompareColor(grid[x + x_prev, y + y_prev], grid[x_prev, y_prev], checkColor) &&
+                            CompareColor(grid[x + x_prev - 2, y + y_prev - 1], grid[x_prev, y_prev], checkColor))
+                        {
+                            AddToDeleteList(grid[x + x_prev, y + y_prev]);
+                            AddToDeleteList(grid[x + x_prev + -2, y + y_prev + -1]);
+                            AddToDeleteList(grid[x_prev, y_prev]); 
+                        }
                     }
                 }
             }
@@ -522,9 +673,14 @@ public class BlockBehavior : MonoBehaviour
                 {
                     if (grid[x + x_prev + -1, y + y_prev + 2].gameObject.GetComponent<PieceBehavior>().type == 0)
                     {
-                        AddToDeleteList(grid[x + x_prev, y + y_prev]);
-                        AddToDeleteList(grid[x + x_prev + -1, y + y_prev + 2]);
-                        AddToDeleteList(grid[x_prev, y_prev]);
+                        if (CompareColor(grid[x + x_prev, y + y_prev], grid[x + x_prev - 1, y + y_prev + 2], checkColor) &&
+                            CompareColor(grid[x + x_prev, y + y_prev], grid[x_prev, y_prev], checkColor) &&
+                            CompareColor(grid[x + x_prev - 1, y + y_prev + 2], grid[x_prev, y_prev], checkColor))
+                        {
+                            AddToDeleteList(grid[x + x_prev, y + y_prev]);
+                            AddToDeleteList(grid[x + x_prev + -1, y + y_prev + 2]);
+                            AddToDeleteList(grid[x_prev, y_prev]); 
+                        }
                     }
                 }
             }
@@ -537,9 +693,14 @@ public class BlockBehavior : MonoBehaviour
                 {
                     if (grid[x + x_prev + -2, y + y_prev + 1].gameObject.GetComponent<PieceBehavior>().type == 0)
                     {
-                        AddToDeleteList(grid[x + x_prev, y + y_prev]);
-                        AddToDeleteList(grid[x + x_prev + -2, y + y_prev + 1]);
-                        AddToDeleteList(grid[x_prev, y_prev]);
+                        if (CompareColor(grid[x + x_prev, y + y_prev], grid[x + x_prev - 2, y + y_prev + 1], checkColor) &&
+                            CompareColor(grid[x + x_prev, y + y_prev], grid[x_prev, y_prev], checkColor) &&
+                            CompareColor(grid[x + x_prev - 2, y + y_prev + 1], grid[x_prev, y_prev], checkColor))
+                        {
+                            AddToDeleteList(grid[x + x_prev, y + y_prev]);
+                            AddToDeleteList(grid[x + x_prev + -2, y + y_prev + 1]);
+                            AddToDeleteList(grid[x_prev, y_prev]); 
+                        }
                     }
                 }
             }
@@ -556,8 +717,10 @@ public class BlockBehavior : MonoBehaviour
                 int roundedY = Mathf.RoundToInt(toDeleteList[i].transform.position.y);
                 grid[roundedX, roundedY] = null;
                 Destroy(toDeleteList[i].gameObject);
+
             }
             toDeleteList.Clear();
+            StartCoroutine(WaitCoroutine());
             return true;
         }
         else { return false; }
@@ -567,7 +730,7 @@ public class BlockBehavior : MonoBehaviour
     {
         for (int i = 0; i < width; i++)
         {
-            for (int j = 1; j < height - 1; j++)
+            for (int j = 1; j < height; j++)
             {
                 if (grid[i, j] != null)
                 {
@@ -576,7 +739,7 @@ public class BlockBehavior : MonoBehaviour
                     {
                         grid[i, j].position -= new Vector3(0, -1, 0);
                     }
-                    else 
+                    else
                     {
                         AddToGridPiece(grid[i, j]);
                         grid[i, j] = null;
@@ -590,21 +753,34 @@ public class BlockBehavior : MonoBehaviour
 
     bool ValidMoveAutomatic(Transform toCheckItem)
     {
-        
-            int roundedX = Mathf.RoundToInt(toCheckItem.transform.position.x);
-            int roundedY = Mathf.RoundToInt(toCheckItem.transform.position.y);
 
-            if (roundedX < 0 || roundedX >= width || roundedY < 0 || roundedY >= height)
-            {
-                return false;
-            }
-            if (grid[roundedX, roundedY] != null)
-            {
-                return false;
-            }
-        
+        int roundedX = Mathf.RoundToInt(toCheckItem.transform.position.x);
+        int roundedY = Mathf.RoundToInt(toCheckItem.transform.position.y);
+
+        if (roundedX < 0 || roundedX >= width || roundedY < 0 || roundedY >= height)
+        {
+            return false;
+        }
+        if (grid[roundedX, roundedY] != null)
+        {
+            return false;
+        }
+
         return true;
     }
+
+    bool CompareColor(Transform grid1, Transform grid2, bool checkcolor)
+    {
+        if (!checkcolor)
+        { return true; }
+        else if ((grid1.gameObject.GetComponent<PieceBehavior>().color == grid2.gameObject.GetComponent<PieceBehavior>().color) ||
+        (grid1.gameObject.GetComponent<PieceBehavior>().color == 99 || grid2.gameObject.GetComponent<PieceBehavior>().color == 99))
+        { return true; }
+        else return false;
+    }
+
+    IEnumerator WaitCoroutine()
+    {
+        yield return new WaitForSeconds(2f);
+    }
 }
-
-
