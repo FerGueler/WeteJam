@@ -52,6 +52,12 @@ public class BlockBehavior : MonoBehaviour
                 transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
                 if (!VaildMove())
                 { transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
+                
+                /*foreach (Transform children in transform) // este foreach es para que las piezas no se giren sobre si mismas
+                {
+                    children.transform.rotation = Quaternion.identity;
+                }
+                */
             }
 
         }
