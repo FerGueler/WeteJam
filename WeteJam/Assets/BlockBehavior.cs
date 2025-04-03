@@ -10,7 +10,7 @@ public class BlockBehavior : MonoBehaviour
     public float fallTime = 0.4f;
     public float quickFallTime = 0.05f;
     public static int height = 12;
-    public static int width = 8;
+    public static int width = 6;
     public Sprite[] spriteList;
     public static Transform[,] grid = new Transform[width, height];
     private List<Transform> toDeleteList = new List<Transform>();
