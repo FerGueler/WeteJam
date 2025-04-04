@@ -19,6 +19,10 @@ public class BlockBehavior : MonoBehaviour
     int colorsNumber = 2;
     bool checkColor = true;
     bool canMove = true;
+    private float lastDpadH;
+    private float lastDpadV;
+    public int playerBelongs;
+    private int numberOfPlayers=2;
     void Start()
     {
         foreach (Transform children in transform)
@@ -30,24 +34,34 @@ public class BlockBehavior : MonoBehaviour
             children.GetComponent<SpriteRenderer>().sprite = spriteList[r + piecesNumber * c];
         }
         if (!isInitialBlock) this.enabled = false;
+        if (isInitialBlock) { playerBelongs = Random.Range(0, numberOfPlayers); } //esto va a haber que arreglarlo para que sea jugable de 1 player
     }
     void Update()
     {
+        if(playerBelongs ==0)
+        { 
+        float dpadV = Input.GetAxisRaw("DPadVertical");
+
+
         if (canMove)
         {
-            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.Joystick3Button2))
+            float dpadH = Input.GetAxisRaw("DPadHorizontal");
+
+            if ( Input.GetKeyDown(KeyCode.A) || (dpadH<-0.6 && lastDpadH >=0))
             {
                 transform.position = transform.position + new Vector3(-1, 0, 0);
                 if (!VaildMove())
                 { transform.position -= new Vector3(-1, 0, 0); }
             }
-            if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.Joystick3Button1))
+            if ( Input.GetKeyDown(KeyCode.D) || (dpadH > 0.6 && lastDpadH <= 0))
             {
                 transform.position = transform.position + new Vector3(1, 0, 0);
                 if (!VaildMove())
                 { transform.position -= new Vector3(1, 0, 0); }
             }
-            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Keypad0) || Input.GetKeyDown(KeyCode.Joystick3Button3))
+
+
+            if ( Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Joystick1Button2) || (dpadV > 0.99 && lastDpadV <= 0))
             {
                 transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
                 if (!VaildMove())
@@ -59,10 +73,11 @@ public class BlockBehavior : MonoBehaviour
                 }
                 */
             }
-
+            lastDpadH = dpadH;
+            lastDpadV = dpadV;
         }
 
-        if (Time.time - previousTime > ((Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.Joystick3Button0)) ? quickFallTime : fallTime))
+        if (Time.time - previousTime > ((Input.GetKey(KeyCode.S) || dpadV<-0.6) ? quickFallTime : fallTime))
         {
             bool continueCheckingBreakers = false;
             bool continueCheckingDowners = false;
@@ -94,10 +109,90 @@ public class BlockBehavior : MonoBehaviour
                 if (!continueCheckingDowners && !continueCheckingBreakers)
                 {
                     this.enabled = false;
-                    FindObjectOfType<GameController>().SpawnNewBlock();
+                    FindObjectOfType<GameController>().SpawnNewBlock(playerBelongs*(-1)+1);
+
                 }
             }
             previousTime = Time.time;
+        }
+        }
+        else if (playerBelongs==1)
+        {
+            float dpadV = Input.GetAxisRaw("Vertical");
+
+
+            if (canMove)
+            {
+                float dpadH = Input.GetAxisRaw("Horizontal");
+
+                if (Input.GetKeyDown(KeyCode.LeftArrow)  || (dpadH < -0.6 && lastDpadH >= 0))
+                {
+                    transform.position = transform.position + new Vector3(-1, 0, 0);
+                    if (!VaildMove())
+                    { transform.position -= new Vector3(-1, 0, 0); }
+                }
+                if (Input.GetKeyDown(KeyCode.RightArrow) || (dpadH > 0.6 && lastDpadH <= 0))
+                {
+                    transform.position = transform.position + new Vector3(1, 0, 0);
+                    if (!VaildMove())
+                    { transform.position -= new Vector3(1, 0, 0); }
+                }
+
+                // para evitar missclicks saqué lo de que se giren con el arriba
+                if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Keypad0) || Input.GetKeyDown(KeyCode.Joystick2Button0) /*|| (dpadV > 0.6 && lastDpadV <= 0)*/)
+                {
+                    transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+                    if (!VaildMove())
+                    { transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
+
+                    /*foreach (Transform children in transform) // este foreach es para que las piezas no se giren sobre si mismas
+                    {
+                        children.transform.rotation = Quaternion.identity;
+                    }
+                    */
+                }
+                lastDpadH = dpadH;
+                lastDpadV = dpadV;
+            }
+
+            if (Time.time - previousTime > ((Input.GetKey(KeyCode.DownArrow) || dpadV < -0.6) ? quickFallTime : fallTime))
+            {
+                bool continueCheckingBreakers = false;
+                bool continueCheckingDowners = false;
+
+
+                foreach (Transform children in transform)
+                {
+                    int roundedX = Mathf.RoundToInt(children.transform.position.x);
+                    int roundedY = Mathf.RoundToInt(children.transform.position.y);
+                    if (roundedY > 0 && roundedY < height)
+                        grid[roundedX, roundedY] = null;
+                }
+                transform.position += new Vector3(0, -1f, 0);
+
+                if (!VaildMove())
+                {
+                    transform.position -= new Vector3(0, -1f, 0);
+                    AddToGridBlock(transform);
+                    canMove = false;
+                    continueCheckingDowners = CheckForDowners();
+
+                    if (!continueCheckingDowners)
+                    {
+                        CheckForBreakers();
+                        continueCheckingBreakers = DeleteList();
+                    }
+
+
+                    if (!continueCheckingDowners && !continueCheckingBreakers)
+                    {
+                        this.enabled = false;
+                        FindObjectOfType<GameController>().SpawnNewBlock(playerBelongs * (-1) + 1);
+
+                    }
+                }
+                previousTime = Time.time;
+            }
         }
     }
     void AddToGridBlock(Transform blockTransform)

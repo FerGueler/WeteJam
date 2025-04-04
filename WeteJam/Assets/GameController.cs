@@ -9,23 +9,46 @@ public class GameController : MonoBehaviour
     private Vector3 spawnPosition = new Vector3 (2,12,0);
     private Vector3 nextBlockPosition = new Vector3(7, 10, 0);
     public GameObject nextBlock;
-    public void SpawnNewBlock()
+    private bool isPaused = false;
+
+    public void SpawnNewBlock(int playerToBelong)
     {
         nextBlock.transform.position = spawnPosition;
         nextBlock.GetComponent<BlockBehavior>().enabled= true;
-        nextBlock=Instantiate(block, nextBlockPosition, Quaternion.identity);
+        nextBlock.GetComponent<BlockBehavior>().playerBelongs = playerToBelong;
+        nextBlock =Instantiate(block, nextBlockPosition, Quaternion.identity);
     }
 
     
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.R)) 
+        if(Input.GetKeyDown(KeyCode.R) || Input.GetKeyDown(KeyCode.JoystickButton8)) 
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+        if (Input.GetKeyDown(KeyCode.Escape)|| Input.GetKeyDown(KeyCode.P)|| Input.GetKeyDown(KeyCode.JoystickButton9))
+        {
+            TogglePause();
+        }
+    }
 
+    void TogglePause()
+    {
+        if (isPaused)
+        {
+            // Unpause the game
+            Time.timeScale = 1f;
+        }
+        else
+        {
+            // Pause the game
+            Time.timeScale = 0f;
+        }
+
+        isPaused = !isPaused;
     }
 }
+
 
 
 
