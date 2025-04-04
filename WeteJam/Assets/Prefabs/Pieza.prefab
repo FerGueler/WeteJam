@@ -48,7 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rotationPoint: {x: 0, y: 0, z: 0}
   isActivePiece: 1
-  fallTime: 0.8
+  fallTime: 1
   quickFallTime: 0.1
   spriteList:
   - {fileID: 1600501595, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
@@ -60,6 +60,7 @@ MonoBehaviour:
   - {fileID: -1756572311, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
   - {fileID: -783707394, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
   isInitialBlock: 0
+  playerBelongs: 0
 --- !u!1001 &1510721620384781949
 PrefabInstance:
   m_ObjectHideFlags: 0

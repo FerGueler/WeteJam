@@ -88,7 +88,7 @@ public class BlockBehavior : MonoBehaviour
                         }
 
                         transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
-                    else { FindObjectOfType<GameController>().PlayRotateSound(); }
+                    else { FindObjectOfType<GameController>().PlayRotateSound(); } //creo que esto esta mal puesto y no suena cuando giras con pared
                     /*foreach (Transform children in transform) // este foreach es para que las piezas no se giren sobre si mismas
                     {
                         children.transform.rotation = Quaternion.identity;
@@ -165,13 +165,31 @@ public class BlockBehavior : MonoBehaviour
                 {
                     transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
                     if (!VaildMove())
-                    { transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
-                    else { FindObjectOfType<GameController>().PlayRotateSound();}
-                    /*foreach (Transform children in transform) // este foreach es para que las piezas no se giren sobre si mismas
                     {
-                        children.transform.rotation = Quaternion.identity;
+                        if (transform.rotation.eulerAngles == (new Vector3(0, 0, 0)))
+                        {
+                            transform.position = transform.position + new Vector3(-1, 0, 0);
+                            if (!VaildMove())
+                            {
+                                transform.position += new Vector3(1, 0, 0);
+                                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
+                            }
+                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+                        }
+                        if (transform.rotation.eulerAngles == (new Vector3(0, 0, 180)))
+                        {
+                            transform.position = transform.position + new Vector3(1, 0, 0);
+                            if (!VaildMove())
+                            {
+                                transform.position -= new Vector3(1, 0, 0);
+                                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
+                            }
+                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+                        }
+
+                        transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
                     }
-                    */
+                    else { FindObjectOfType<GameController>().PlayRotateSound(); } //creo que esto esta mal puesto y no suena cuando giras con pared
                 }
                 lastDpadH = dpadH;
                 lastDpadV = dpadV;
