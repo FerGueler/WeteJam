@@ -16,7 +16,7 @@ public class BlockBehavior : MonoBehaviour
     private List<Transform> toDeleteList = new List<Transform>();
     public bool isInitialBlock;
     int piecesNumber = 4;
-    int colorsNumber = 1;
+    int colorsNumber = 1; //solo con cambiar este numero el juego cambia de 1 a 2 colores
     bool checkColor = true;
     bool canMove = true;
     private float lastDpadH;
