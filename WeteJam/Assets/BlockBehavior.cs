@@ -16,7 +16,7 @@ public class BlockBehavior : MonoBehaviour
     private List<Transform> toDeleteList = new List<Transform>();
     public bool isInitialBlock;
     int piecesNumber = 4;
-    int colorsNumber = 2;
+    int colorsNumber = 1;
     bool checkColor = true;
     bool canMove = true;
     private float lastDpadH;
@@ -43,7 +43,6 @@ public class BlockBehavior : MonoBehaviour
         { 
         float dpadV = Input.GetAxisRaw("DPadVertical");
 
-
         if (canMove)
         {
             float dpadH = Input.GetAxisRaw("DPadHorizontal");
@@ -66,7 +65,29 @@ public class BlockBehavior : MonoBehaviour
             {
                 transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
                 if (!VaildMove())
-                { transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
+                {
+                        if (transform.rotation.eulerAngles == (new Vector3(0, 0, 0)))
+                        { 
+                            transform.position = transform.position + new Vector3(-1, 0, 0);
+                            if (!VaildMove())
+                            {
+                                transform.position += new Vector3(1, 0, 0);
+                                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
+                            }
+                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+                        }
+                        if (transform.rotation.eulerAngles == (new Vector3 (0, 0, 180)))
+                        { 
+                            transform.position = transform.position + new Vector3(1, 0, 0);
+                            if (!VaildMove())
+                            {
+                                transform.position -= new Vector3(1, 0, 0);
+                                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
+                            }
+                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+                        }
+
+                        transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
                     else { FindObjectOfType<GameController>().PlayRotateSound(); }
                     /*foreach (Transform children in transform) // este foreach es para que las piezas no se giren sobre si mismas
                     {
@@ -120,7 +141,6 @@ public class BlockBehavior : MonoBehaviour
         else if (playerBelongs==1)
         {
             float dpadV = Input.GetAxisRaw("Vertical");
-
 
             if (canMove)
             {
