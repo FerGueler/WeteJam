@@ -22,7 +22,7 @@ public class BlockBehavior : MonoBehaviour
     private float lastDpadH;
     private float lastDpadV;
     public int playerBelongs;
-    private int numberOfPlayers=2;
+    private int numberOfPlayers;
     void Start()
     {
         foreach (Transform children in transform)
@@ -33,6 +33,7 @@ public class BlockBehavior : MonoBehaviour
             children.GetComponent<PieceBehavior>().color = c;
             children.GetComponent<SpriteRenderer>().sprite = spriteList[r + piecesNumber * c];
         }
+        numberOfPlayers = FindObjectOfType<GameController>().numberOfPlayers;
         if (!isInitialBlock) this.enabled = false;
         if (isInitialBlock) { playerBelongs = Random.Range(0, numberOfPlayers); } //esto va a haber que arreglarlo para que sea jugable de 1 player
     }
@@ -60,19 +61,19 @@ public class BlockBehavior : MonoBehaviour
                 { transform.position -= new Vector3(1, 0, 0); }
             }
 
-
-            if ( Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Joystick1Button2) || (dpadV > 0.99 && lastDpadV <= 0))
+            // para evitar missclicks saqué que se pueda girar con el arriba en mando
+            if ( Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Joystick1Button2) /*|| (dpadV > 0.99 && lastDpadV <= 0)*/)
             {
                 transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
                 if (!VaildMove())
                 { transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
-                
-                /*foreach (Transform children in transform) // este foreach es para que las piezas no se giren sobre si mismas
-                {
-                    children.transform.rotation = Quaternion.identity;
+                    else { FindObjectOfType<GameController>().PlayRotateSound(); }
+                    /*foreach (Transform children in transform) // este foreach es para que las piezas no se giren sobre si mismas
+                    {
+                        children.transform.rotation = Quaternion.identity;
+                    }
+                    */
                 }
-                */
-            }
             lastDpadH = dpadH;
             lastDpadV = dpadV;
         }
@@ -136,15 +137,16 @@ public class BlockBehavior : MonoBehaviour
                     transform.position = transform.position + new Vector3(1, 0, 0);
                     if (!VaildMove())
                     { transform.position -= new Vector3(1, 0, 0); }
+                    
                 }
 
-                // para evitar missclicks saqué lo de que se giren con el arriba
+                // para evitar missclicks saqué lo de que se giren con el arriba en mando
                 if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Keypad0) || Input.GetKeyDown(KeyCode.Joystick2Button0) /*|| (dpadV > 0.6 && lastDpadV <= 0)*/)
                 {
                     transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
                     if (!VaildMove())
                     { transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
-
+                    else { FindObjectOfType<GameController>().PlayRotateSound();}
                     /*foreach (Transform children in transform) // este foreach es para que las piezas no se giren sobre si mismas
                     {
                         children.transform.rotation = Quaternion.identity;
@@ -829,6 +831,7 @@ public class BlockBehavior : MonoBehaviour
     {
         if (toDeleteList.Count > 0)
         {
+            FindObjectOfType<GameController>().PlayDestroySound();
             for (int i = 0; i < toDeleteList.Count; i++)
             {
                 int roundedX = Mathf.RoundToInt(toDeleteList[i].transform.position.x);

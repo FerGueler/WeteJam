@@ -10,12 +10,23 @@ public class GameController : MonoBehaviour
     private Vector3 nextBlockPosition = new Vector3(7, 10, 0);
     public GameObject nextBlock;
     private bool isPaused = false;
+    public AudioClip rotateSound;
+    public AudioClip destroySound;
+    public int numberOfPlayers=2;
 
     public void SpawnNewBlock(int playerToBelong)
     {
         nextBlock.transform.position = spawnPosition;
         nextBlock.GetComponent<BlockBehavior>().enabled= true;
+        if (numberOfPlayers > 1)
+        { 
         nextBlock.GetComponent<BlockBehavior>().playerBelongs = playerToBelong;
+            
+        }
+        else
+        {
+            nextBlock.GetComponent<BlockBehavior>().playerBelongs = 0;
+        }
         nextBlock =Instantiate(block, nextBlockPosition, Quaternion.identity);
     }
 
@@ -26,9 +37,13 @@ public class GameController : MonoBehaviour
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
-        if (Input.GetKeyDown(KeyCode.Escape)|| Input.GetKeyDown(KeyCode.P)|| Input.GetKeyDown(KeyCode.JoystickButton9))
+        if (Input.GetKeyDown(KeyCode.P)|| Input.GetKeyDown(KeyCode.JoystickButton9))
         {
             TogglePause();
+        }
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(0);
         }
     }
 
@@ -46,6 +61,16 @@ public class GameController : MonoBehaviour
         }
 
         isPaused = !isPaused;
+    }
+
+    public void PlayRotateSound()
+    {
+        AudioSource.PlayClipAtPoint(rotateSound, new Vector3(3.5f, 5.5f, -10));
+    }
+
+    public void PlayDestroySound()
+    {
+        AudioSource.PlayClipAtPoint(destroySound, new Vector3(3.5f, 5.5f, -10));
     }
 }
 
