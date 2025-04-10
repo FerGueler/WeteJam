@@ -39,7 +39,7 @@ public class BlockBehavior : MonoBehaviour
     }
     void Update()
     {
-        if(playerBelongs ==0)
+        if(playerBelongs ==1)
         { 
         float dpadV = Input.GetAxisRaw("DPadVertical");
 
@@ -138,7 +138,7 @@ public class BlockBehavior : MonoBehaviour
             previousTime = Time.time;
         }
         }
-        else if (playerBelongs==1)
+        else if (playerBelongs==0)
         {
             float dpadV = Input.GetAxisRaw("Vertical");
 
