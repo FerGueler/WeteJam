@@ -9,14 +9,14 @@ public class BlockBehavior : MonoBehaviour
     private float previousTime;
     public float fallTime = 0.4f;
     public float quickFallTime = 0.05f;
-    public static int height = 12;
+    public static int height = 13;
     public static int width = 6;
     public Sprite[] spriteList;
     public static Transform[,] grid = new Transform[width, height];
     private List<Transform> toDeleteList = new List<Transform>();
     public bool isInitialBlock;
     int piecesNumber = 4;
-    int colorsNumber = 2; //solo con cambiar este numero el juego cambia de 1 a 2 colores
+    int colorsNumber = 1; //solo con cambiar este numero el juego cambia de 1 a 2 colores
     bool checkColor = true;
     bool canMove = true;
     private float lastDpadH;
