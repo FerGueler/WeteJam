@@ -50,6 +50,8 @@ public class GameController : MonoBehaviour
             levelUpTitleText.SetActive(false);
 
         }
+
+        BlockBehavior.fallTime = 1f;
     }
 
     void Update()

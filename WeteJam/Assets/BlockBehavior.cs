@@ -7,15 +7,15 @@ public class BlockBehavior : MonoBehaviour
     public Vector3 rotationPoint;
     public bool isActivePiece = true;
     private float previousTime;
-    public float fallTime = 0.4f;
-    public float quickFallTime = 0.05f;
+    public static float fallTime = 1f;
+    public float quickFallTime = 0.1f;
     public static int height = 13;
     public static int width = 6;
     public Sprite[] spriteList;
     public static Transform[,] grid = new Transform[width, height];
     private List<Transform> toDeleteList = new List<Transform>();
     public bool isInitialBlock;
-    int piecesNumber = 4;
+    public static int piecesNumber = 3;
     int colorsNumber = 1; //solo con cambiar este numero el juego cambia de 1 a 2 colores
     bool checkColor = true;
     bool canMove = true;
@@ -28,6 +28,7 @@ public class BlockBehavior : MonoBehaviour
     public static int scorePerPiece = 30;
     public static int currentLevel = 0;
     public static int nextScoreToLevelUp=120;
+    public static int[] levelUpScores = {90,180,1000,4000,5000,6000,7000,8000,9000,999999999};
     void Start()
     {
         foreach (Transform children in transform)
@@ -896,11 +897,10 @@ public class BlockBehavior : MonoBehaviour
             {
                 FindObjectOfType<GameController>().ComboAnimation(comboCount);    
             }
-            if (score >= nextScoreToLevelUp)
+            if (score >= levelUpScores[currentLevel])
             {
-                currentLevel++;
+                LevelUp();
                 FindObjectOfType<GameController>().DisplayLevelUp();
-                nextScoreToLevelUp = 10000000;
             }
 
             //xcomboCount Animation
@@ -973,6 +973,38 @@ public class BlockBehavior : MonoBehaviour
         }
 
         return true;
+    }
+
+    public void LevelUp()
+    {
+        currentLevel++;
+        if (currentLevel==1)
+        {
+            fallTime = 1f;
+        }
+        else if (currentLevel == 2)
+        {
+            piecesNumber = 4;
+        }
+        else if (currentLevel == 6)
+        {
+            fallTime = 0.8f;
+
+        }
+        else if (currentLevel == 7)
+        {
+            fallTime = 0.7f;
+
+        }
+        else if (currentLevel == 8)
+        {
+            fallTime = 0.6f;
+
+        }
+        else if (currentLevel == 9)
+        {
+            fallTime = 0.54f;
+        }
     }
 
     bool CompareColor(Transform grid1, Transform grid2, bool checkcolor)
