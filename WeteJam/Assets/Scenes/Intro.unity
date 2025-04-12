@@ -4815,7 +4815,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2044891739}
         m_TargetAssemblyTypeName: IntroConroller, Assembly-CSharp
-        m_MethodName: Load2Players
+        m_MethodName: Load2Player
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6014,9 +6014,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2044891737}
+      - m_Target: {fileID: 2044891739}
         m_TargetAssemblyTypeName: IntroConroller, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: Load1Player
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

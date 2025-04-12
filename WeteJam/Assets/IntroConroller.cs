@@ -6,10 +6,12 @@ using UnityEngine.SceneManagement;
 
 public class IntroConroller : MonoBehaviour
 {
+    public static int numberOfPlayersSettings;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -21,15 +23,26 @@ public class IntroConroller : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.UpArrow))
-        { Load1Player(); }
+        {
+            Load1Player();
+        }
 
         if (Input.GetKeyDown(KeyCode.DownArrow))
-        { Load2Players(); }
+        {
+            Load2Player();
+        }
     }
 
-    public void Load2Players()
-    { SceneManager.LoadScene(2); }
-
     public void Load1Player()
-    { SceneManager.LoadScene(1); }
+    {
+        numberOfPlayersSettings = 1;
+        SceneManager.LoadScene(1);
+
+    }
+    public void Load2Player()
+    {
+        numberOfPlayersSettings = 2;
+        SceneManager.LoadScene(1);
+
+    }
 }

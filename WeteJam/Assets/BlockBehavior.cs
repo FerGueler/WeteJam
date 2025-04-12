@@ -23,6 +23,11 @@ public class BlockBehavior : MonoBehaviour
     private float lastDpadV;
     public int playerBelongs;
     private int numberOfPlayers;
+    public static int score;
+    public static int comboCount = 1;
+    public static int scorePerPiece = 30;
+    public static int currentLevel = 0;
+    public static int nextScoreToLevelUp=120;
     void Start()
     {
         foreach (Transform children in transform)
@@ -35,7 +40,19 @@ public class BlockBehavior : MonoBehaviour
         }
         numberOfPlayers = FindObjectOfType<GameController>().numberOfPlayers;
         if (!isInitialBlock) this.enabled = false;
-        if (isInitialBlock) { playerBelongs = Random.Range(0, numberOfPlayers); } //esto va a haber que arreglarlo para que sea jugable de 1 player
+
+        if (isInitialBlock) 
+        { 
+            if(numberOfPlayers==1)
+            {
+                FindObjectOfType<GameController>().SpawnNewBlock(1);
+                Destroy(gameObject);
+            }
+            else
+            {
+                playerBelongs = Random.Range(0, numberOfPlayers);
+            }
+        } 
     }
     void Update()
     {
@@ -867,8 +884,27 @@ public class BlockBehavior : MonoBehaviour
 
     bool DeleteList()
     {
+        
         if (toDeleteList.Count > 0)
         {
+
+            HashSet<Transform> uniqueDeleteList = new HashSet<Transform>(toDeleteList);
+            int scored = scorePerPiece * uniqueDeleteList.Count * comboCount;
+            score = score + scored;
+            FindObjectOfType<GameController>().UpdateScoredDisplay(scored);
+            if (comboCount > 1)
+            {
+                FindObjectOfType<GameController>().ComboAnimation(comboCount);    
+            }
+            if (score >= nextScoreToLevelUp)
+            {
+                currentLevel++;
+                FindObjectOfType<GameController>().DisplayLevelUp();
+                nextScoreToLevelUp = 10000000;
+            }
+
+            //xcomboCount Animation
+
             FindObjectOfType<GameController>().PlayDestroySound();
             for (int i = 0; i < toDeleteList.Count; i++)
             {
@@ -887,6 +923,7 @@ public class BlockBehavior : MonoBehaviour
 
             }
             toDeleteList.Clear();
+            comboCount++;
             return true;
         }
         else { return false; }
