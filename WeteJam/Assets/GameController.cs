@@ -37,6 +37,14 @@ public class GameController : MonoBehaviour
         numberOfPlayers = IntroConroller.numberOfPlayersSettings;
         BlockBehavior.score = 0;
         BlockBehavior.currentLevel = 0;
+        if (numberOfPlayers ==1)
+        { 
+        BlockBehavior.piecesList = new List<Vector2Int> { new Vector2Int(2, 0), new Vector2Int(1, 0) };
+        }
+        else if (numberOfPlayers == 2)
+        {
+            BlockBehavior.piecesList = new List<Vector2Int> { new Vector2Int(2, 0), new Vector2Int(1, 0), new Vector2Int(3, 0), new Vector2Int(0, 0) };
+        }
     }
 
     private void Start()
@@ -50,7 +58,7 @@ public class GameController : MonoBehaviour
             levelUpTitleText.SetActive(false);
 
         }
-
+        
         BlockBehavior.fallTime = 1f;
     }
 
@@ -169,7 +177,7 @@ public class GameController : MonoBehaviour
     {
         if (numberOfPlayers == 1)
         {
-            levelText.text = BlockBehavior.currentLevel.ToString();
+        levelText.text = BlockBehavior.currentLevel.ToString();
         levelUpText.gameObject.SetActive(true);
         StartDeactivateLevelUpCountdown();
         }

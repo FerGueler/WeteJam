@@ -15,7 +15,7 @@ public class BlockBehavior : MonoBehaviour
     public static Transform[,] grid = new Transform[width, height];
     private List<Transform> toDeleteList = new List<Transform>();
     public bool isInitialBlock;
-    public static int piecesNumber = 3;
+    public static int piecesNumber = 4;
     int colorsNumber = 1; //solo con cambiar este numero el juego cambia de 1 a 2 colores
     bool checkColor = true;
     bool canMove = true;
@@ -28,16 +28,19 @@ public class BlockBehavior : MonoBehaviour
     public static int scorePerPiece = 30;
     public static int currentLevel = 0;
     public static int nextScoreToLevelUp=120;
-    public static int[] levelUpScores = {90,180,1000,4000,5000,6000,7000,8000,9000,999999999};
+    public static int[] levelUpScores = {180,800,5000,8000,12000,16000,20000,25000,30000,999999999};
+    public static List<Vector2Int> piecesList = new List<Vector2Int> {new Vector2Int(2,0), new Vector2Int(1,0) };
+
     void Start()
     {
+        
         foreach (Transform children in transform)
         {
-            int r = Random.Range(0, piecesNumber);
-            children.GetComponent<PieceBehavior>().type = r;
-            int c = Random.Range(0, colorsNumber);
-            children.GetComponent<PieceBehavior>().color = c;
-            children.GetComponent<SpriteRenderer>().sprite = spriteList[r + piecesNumber * c];
+            int randomIndex = Random.Range(0, piecesList.Count);
+            Vector2Int randomPiece = piecesList[randomIndex];
+            children.GetComponent<PieceBehavior>().type = randomPiece[0];
+            children.GetComponent<PieceBehavior>().color = randomPiece[1];
+            children.GetComponent<SpriteRenderer>().sprite = spriteList[randomPiece[0] + piecesNumber * randomPiece[1]];
         }
         numberOfPlayers = FindObjectOfType<GameController>().numberOfPlayers;
         if (!isInitialBlock) this.enabled = false;
@@ -977,34 +980,49 @@ public class BlockBehavior : MonoBehaviour
 
     public void LevelUp()
     {
-        currentLevel++;
-        if (currentLevel==1)
+        if (numberOfPlayers==1)
         {
-            fallTime = 1f;
-        }
-        else if (currentLevel == 2)
-        {
-            piecesNumber = 4;
-        }
-        else if (currentLevel == 6)
-        {
-            fallTime = 0.8f;
+            currentLevel++;
+            if (currentLevel == 1)
+            {
+                piecesList.Add(new Vector2Int(3, 0));
+            }
+            else if (currentLevel == 2)
+            {
+                piecesList.Add(new Vector2Int(0, 0));
+            }
+            else if (currentLevel == 3)
+            {
+                piecesList.Add(new Vector2Int(3, 1));
+            }
+            else if (currentLevel == 4)
+            {
+                piecesList.Add(new Vector2Int(1, 1));
+            }
+            else if (currentLevel == 5)
+            {
+                piecesList.Add(new Vector2Int(2, 1));
+            }
+            else if (currentLevel == 6)
+            {
+                piecesList.Add(new Vector2Int(0, 1));
+            }
+            else if (currentLevel == 7)
+            {
+                fallTime = 0.8f;
 
-        }
-        else if (currentLevel == 7)
-        {
-            fallTime = 0.7f;
+            }
+            else if (currentLevel == 8)
+            {
+                fallTime = 0.6f;
 
+            }
+            else if (currentLevel == 9)
+            {
+                fallTime = 0.54f;
+            } 
         }
-        else if (currentLevel == 8)
-        {
-            fallTime = 0.6f;
 
-        }
-        else if (currentLevel == 9)
-        {
-            fallTime = 0.54f;
-        }
     }
 
     bool CompareColor(Transform grid1, Transform grid2, bool checkcolor)
