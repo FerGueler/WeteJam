@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,7 +8,7 @@ using UnityEngine.SceneManagement;
 public class IntroConroller : MonoBehaviour
 {
     public static int numberOfPlayersSettings;
-
+    public TextMeshProUGUI highscoreText;
     // Start is called before the first frame update
     void Start()
     {
@@ -31,6 +32,8 @@ public class IntroConroller : MonoBehaviour
         {
             Load2Player();
         }
+
+        highscoreText.text = PlayerPrefs.GetInt("recordScore").ToString();
     }
 
     public void Load1Player()

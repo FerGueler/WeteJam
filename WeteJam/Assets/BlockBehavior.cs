@@ -28,7 +28,7 @@ public class BlockBehavior : MonoBehaviour
     public static int scorePerPiece = 30;
     public static int currentLevel = 0;
     public static int nextScoreToLevelUp=120;
-    public static int[] levelUpScores = {180,800,5000,8000,12000,16000,20000,25000,30000,999999999};
+    public static int[] levelUpScores = {180,800,4000,7000,10000,13000,18000,22000,26000,999999999};
     public static List<Vector2Int> piecesList = new List<Vector2Int> {new Vector2Int(2,0), new Vector2Int(1,0) };
 
     void Start()
@@ -49,8 +49,9 @@ public class BlockBehavior : MonoBehaviour
         { 
             if(numberOfPlayers==1)
             {
-                FindObjectOfType<GameController>().SpawnNewBlock(1);
                 Destroy(gameObject);
+
+                FindObjectOfType<GameController>().SpawnNewBlock(1);
             }
             else
             {
@@ -227,7 +228,7 @@ public class BlockBehavior : MonoBehaviour
                     int roundedX = Mathf.RoundToInt(children.transform.position.x);
                     int roundedY = Mathf.RoundToInt(children.transform.position.y);
                     if (roundedY > 0 && roundedY < height)
-                        grid[roundedX, roundedY] = null;
+                    { grid[roundedX, roundedY] = null; }
                 }
                 transform.position += new Vector3(0, -1f, 0);
 
@@ -891,7 +892,7 @@ public class BlockBehavior : MonoBehaviour
         
         if (toDeleteList.Count > 0)
         {
-
+            bool playerWin = false;
             HashSet<Transform> uniqueDeleteList = new HashSet<Transform>(toDeleteList);
             int scored = scorePerPiece * uniqueDeleteList.Count * comboCount;
             score = score + scored;
@@ -914,6 +915,13 @@ public class BlockBehavior : MonoBehaviour
                 int roundedX = Mathf.RoundToInt(toDeleteList[i].transform.position.x);
                 int roundedY = Mathf.RoundToInt(toDeleteList[i].transform.position.y);
                 grid[roundedX, roundedY] = null;
+                if(numberOfPlayers ==2)
+                {
+                    if(toDeleteList[i].transform.CompareTag("Initial"))
+                    {
+                        playerWin = true;
+                    }
+                }
                 Destroy(toDeleteList[i].gameObject);
                 
                 if(transform.childCount>0)
@@ -924,6 +932,10 @@ public class BlockBehavior : MonoBehaviour
                     }
                 }
 
+            }
+            if (playerWin)
+            {
+                FindObjectOfType<GameController>().PlayerWins(playerBelongs);
             }
             toDeleteList.Clear();
             comboCount++;

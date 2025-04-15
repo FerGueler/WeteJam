@@ -16,6 +16,9 @@ public class GameController : MonoBehaviour
     public AudioClip destroySound;
     public AudioClip pauseSound;
     public AudioClip resumeSound;
+    public AudioClip levelupSound;
+    public AudioClip playerWinSound;
+    public AudioClip gameOverSound;
     public int numberOfPlayers;
     public GameObject gameOverText;
     public GameObject gameOverText2;
@@ -28,6 +31,8 @@ public class GameController : MonoBehaviour
     public TextMeshProUGUI comboAnimationText;
     public TextMeshProUGUI scoredDisplay;
     public TextMeshProUGUI levelText;
+    public TextMeshProUGUI playerWins;
+    public TextMeshProUGUI highscoreText;
     private float comboCountdown;
     private float scoredCountdown;
     private float levelUpCountdown;
@@ -49,6 +54,8 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
+        Time.timeScale = 1f;
+
         if (numberOfPlayers==2) 
         { 
             scoreText.gameObject.SetActive(false);
@@ -96,7 +103,7 @@ public class GameController : MonoBehaviour
         { levelUpText.SetActive(false); }
     }
 
-    void TogglePause()
+    public void TogglePause()
     {
         if (isPaused)
         {
@@ -123,6 +130,11 @@ public class GameController : MonoBehaviour
             gameOverText.SetActive(true);
             gameOverText2.SetActive(true);
             shadeOver.SetActive(true);
+            if (numberOfPlayers == 1 && BlockBehavior.score> PlayerPrefs.GetInt("recordScore"))
+            {
+                PlayerPrefs.SetInt("recordScore", BlockBehavior.score);
+                highscoreText.gameObject.SetActive(true);
+            }
         }
         else {
         BlockBehavior.comboCount = 1;
@@ -148,6 +160,7 @@ public class GameController : MonoBehaviour
             if (BlockBehavior.grid[i, BlockBehavior.height - 1] != null)
             {
                 gameOver=true;
+                PlayGameOverSound();
                 return gameOver;
             }
         }
@@ -180,6 +193,7 @@ public class GameController : MonoBehaviour
         levelText.text = BlockBehavior.currentLevel.ToString();
         levelUpText.gameObject.SetActive(true);
         StartDeactivateLevelUpCountdown();
+        PlayLevelUpSound();
         }
     }
 
@@ -213,6 +227,35 @@ public class GameController : MonoBehaviour
     public void PlayDestroySound()
     {
         AudioSource.PlayClipAtPoint(destroySound, new Vector3(3.5f, 5.5f, -10));
+    }
+
+    public void PlayWinSound()
+    {
+        AudioSource.PlayClipAtPoint(playerWinSound, new Vector3(3.5f, 5.5f, -10), 0.4f);
+    }
+
+    public void PlayGameOverSound()
+    {
+        GetComponent<AudioSource>().Stop();
+        AudioSource.PlayClipAtPoint(gameOverSound, new Vector3(3.5f, 5.5f, -10), 0.4f);
+    }
+
+    public void PlayLevelUpSound()
+    {
+        AudioSource.PlayClipAtPoint(levelupSound, new Vector3(3.5f, 5.5f, -10), 0.5f);
+    }
+
+
+
+    public void PlayerWins(int winner)
+    {
+        GetComponent<AudioSource>().Stop();
+        PlayWinSound();
+        Time.timeScale = 0f;
+        shadeOver.SetActive(true);
+        playerWins.text = "Player " + (winner + 1) + " wins!";
+        playerWins.gameObject.SetActive(true);
+        gameOverText2.SetActive(true);
     }
 }
 
