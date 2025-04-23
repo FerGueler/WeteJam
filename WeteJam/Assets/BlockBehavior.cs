@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
+
 
 public class BlockBehavior : MonoBehaviour
 {
@@ -30,6 +33,16 @@ public class BlockBehavior : MonoBehaviour
     public static int nextScoreToLevelUp=120;
     public static int[] levelUpScores = {180,800,4000,7000,10000,13000,18000,22000,26000,999999999};
     public static List<Vector2Int> piecesList = new List<Vector2Int> {new Vector2Int(2,0), new Vector2Int(1,0) };
+    private PlayerControls controls1;
+    private Vector2 moveInput1;
+    private bool fallQuickly = false;
+    private bool fallQuickly1 = false;
+
+    private void Awake()
+    {
+        controls1 = new PlayerControls();
+    }
+
 
     void Start()
     {
@@ -57,71 +70,177 @@ public class BlockBehavior : MonoBehaviour
             {
                 playerBelongs = Random.Range(0, numberOfPlayers);
             }
-        } 
-    }
-    void Update()
-    {
-        if(playerBelongs ==1)
-        { 
-        float dpadV = Input.GetAxisRaw("DPadVertical");
+        }
 
-        if (canMove)
+        //todo esto no parece funcionar
+        /*
+        var gamepads = Gamepad.all;
+       
+        if (gamepads.Count > 1)
         {
-            float dpadH = Input.GetAxisRaw("DPadHorizontal");
-
-            if ( Input.GetKeyDown(KeyCode.A) || (dpadH<-0.6 && lastDpadH >=0))
+            Debug.Log("mas de 1 mando");
+            if (playerBelongs == 0)
             {
-                transform.position = transform.position + new Vector3(-1, 0, 0);
-                if (!VaildMove())
-                { transform.position -= new Vector3(-1, 0, 0); }
+                controls1.devices = new InputDevice[] { gamepads[0] };
+                controls1.Enable();
             }
-            if ( Input.GetKeyDown(KeyCode.D) || (dpadH > 0.6 && lastDpadH <= 0))
+            if (playerBelongs == 1)
             {
-                transform.position = transform.position + new Vector3(1, 0, 0);
-                if (!VaildMove())
-                { transform.position -= new Vector3(1, 0, 0); }
-            }
+                
+                {
+                    controls1.devices = new InputDevice[] { gamepads[1] };
+                    controls1.Enable();
+                }
 
-            // para evitar missclicks saqué que se pueda girar con el arriba en mando
-            if ( Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Joystick1Button2) /*|| (dpadV > 0.99 && lastDpadV <= 0)*/)
+            }
+        }
+        */
+
+            
+    }
+    private void OnEnable()
+    {
+        controls1.Player1.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls1.Player1.Disable();
+    }
+
+    private void OnMove(InputValue inputValue)
+    {
+        float direction = inputValue.Get<float>();
+        if (playerBelongs == 0)
+        {
+            if (canMove)
+            {
+                transform.position = transform.position + new Vector3(direction, 0, 0);
+                if (!VaildMove())
+                {
+                    transform.position = transform.position - new Vector3(direction, 0, 0);
+                }
+
+            }
+        }
+    }
+
+    public void OnDrop(InputValue value)
+    {
+        if (playerBelongs == 0)
+        { 
+            // We assume that a value greater than 0 indicates the button is pressed.
+            float buttonValue = value.Get<float>();
+            fallQuickly = (buttonValue > 0.5f);
+        }
+    }
+
+
+    private void OnRotate()
+    {
+        if (playerBelongs == 0)
+        {
+            if (canMove)
             {
                 transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
                 if (!VaildMove())
                 {
-                        if (transform.rotation.eulerAngles == (new Vector3(0, 0, 0)))
-                        { 
-                            transform.position = transform.position + new Vector3(-1, 0, 0);
-                            if (!VaildMove())
-                            {
-                                transform.position += new Vector3(1, 0, 0);
-                                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
-                            }
-                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
-                        }
-                        if (transform.rotation.eulerAngles == (new Vector3 (0, 0, 180)))
-                        { 
-                            transform.position = transform.position + new Vector3(1, 0, 0);
-                            if (!VaildMove())
-                            {
-                                transform.position -= new Vector3(1, 0, 0);
-                                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
-                            }
-                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
-                        }
-
-                        transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90); }
-                    else { FindObjectOfType<GameController>().PlayRotateSound(); } //creo que esto esta mal puesto y no suena cuando giras con pared
-                    /*foreach (Transform children in transform) // este foreach es para que las piezas no se giren sobre si mismas
+                    if (transform.rotation.eulerAngles == (new Vector3(0, 0, 0)))
                     {
-                        children.transform.rotation = Quaternion.identity;
+                        transform.position = transform.position + new Vector3(-1, 0, 0);
+                        if (!VaildMove())
+                        {
+                            transform.position += new Vector3(1, 0, 0);
+                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
+                        }
+                        transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
                     }
-                    */
-                }
-            lastDpadH = dpadH;
-            lastDpadV = dpadV;
-        }
+                    if (transform.rotation.eulerAngles == (new Vector3(0, 0, 180)))
+                    {
+                        transform.position = transform.position + new Vector3(1, 0, 0);
+                        if (!VaildMove())
+                        {
+                            transform.position -= new Vector3(1, 0, 0);
+                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
+                        }
+                        transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+                    }
 
-        if (Time.time - previousTime > ((Input.GetKey(KeyCode.S) || dpadV<-0.6) ? quickFallTime : fallTime))
+                    transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
+                }
+                else { FindObjectOfType<GameController>().PlayRotateSound(); }
+            }
+        }
+    }
+
+    private void OnMove1(InputValue inputValue)
+    {
+        float direction = inputValue.Get<float>();
+        if (playerBelongs == 1)
+        {
+            if (canMove)
+            {
+                transform.position = transform.position + new Vector3(direction, 0, 0);
+                if (!VaildMove())
+                {
+                    transform.position = transform.position - new Vector3(direction, 0, 0);
+                }
+
+            }
+        }
+    }
+
+    public void OnDrop1(InputValue value)
+    {
+        if (playerBelongs == 1)
+        {
+            // We assume that a value greater than 0 indicates the button is pressed.
+            float buttonValue = value.Get<float>();
+            fallQuickly1 = (buttonValue > 0.5f);
+        }
+    }
+
+
+    private void OnRotate1()
+    {
+        if (playerBelongs == 1)
+        {
+            if (canMove)
+            {
+                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+                if (!VaildMove())
+                {
+                    if (transform.rotation.eulerAngles == (new Vector3(0, 0, 0)))
+                    {
+                        transform.position = transform.position + new Vector3(-1, 0, 0);
+                        if (!VaildMove())
+                        {
+                            transform.position += new Vector3(1, 0, 0);
+                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
+                        }
+                        transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+                    }
+                    if (transform.rotation.eulerAngles == (new Vector3(0, 0, 180)))
+                    {
+                        transform.position = transform.position + new Vector3(1, 0, 0);
+                        if (!VaildMove())
+                        {
+                            transform.position -= new Vector3(1, 0, 0);
+                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
+                        }
+                        transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
+                    }
+
+                    transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
+                }
+                else { FindObjectOfType<GameController>().PlayRotateSound(); }
+            }
+        }
+    }
+
+    void Update()
+    {
+        if (Time.time - previousTime > (((playerBelongs ==0 && fallQuickly)||(playerBelongs == 1 && fallQuickly1) ) ? quickFallTime : fallTime))
         {
             bool continueCheckingBreakers = false;
             bool continueCheckingDowners = false;
@@ -158,103 +277,6 @@ public class BlockBehavior : MonoBehaviour
                 }
             }
             previousTime = Time.time;
-        }
-        }
-        else if (playerBelongs==0)
-        {
-            float dpadV = Input.GetAxisRaw("Vertical");
-
-            if (canMove)
-            {
-                float dpadH = Input.GetAxisRaw("Horizontal");
-
-                if (Input.GetKeyDown(KeyCode.LeftArrow)  || (dpadH < -0.6 && lastDpadH >= 0))
-                {
-                    transform.position = transform.position + new Vector3(-1, 0, 0);
-                    if (!VaildMove())
-                    { transform.position -= new Vector3(-1, 0, 0); }
-                }
-                if (Input.GetKeyDown(KeyCode.RightArrow) || (dpadH > 0.6 && lastDpadH <= 0))
-                {
-                    transform.position = transform.position + new Vector3(1, 0, 0);
-                    if (!VaildMove())
-                    { transform.position -= new Vector3(1, 0, 0); }
-                    
-                }
-
-                // para evitar missclicks saqué lo de que se giren con el arriba en mando
-                if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Keypad0) || Input.GetKeyDown(KeyCode.Joystick2Button0) /*|| (dpadV > 0.6 && lastDpadV <= 0)*/)
-                {
-                    transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
-                    if (!VaildMove())
-                    {
-                        if (transform.rotation.eulerAngles == (new Vector3(0, 0, 0)))
-                        {
-                            transform.position = transform.position + new Vector3(-1, 0, 0);
-                            if (!VaildMove())
-                            {
-                                transform.position += new Vector3(1, 0, 0);
-                                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
-                            }
-                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
-                        }
-                        if (transform.rotation.eulerAngles == (new Vector3(0, 0, 180)))
-                        {
-                            transform.position = transform.position + new Vector3(1, 0, 0);
-                            if (!VaildMove())
-                            {
-                                transform.position -= new Vector3(1, 0, 0);
-                                transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
-                            }
-                            transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), 90);
-                        }
-
-                        transform.RotateAround(transform.TransformPoint(rotationPoint), new Vector3(0, 0, 1), -90);
-                    }
-                    else { FindObjectOfType<GameController>().PlayRotateSound(); } //creo que esto esta mal puesto y no suena cuando giras con pared
-                }
-                lastDpadH = dpadH;
-                lastDpadV = dpadV;
-            }
-
-            if (Time.time - previousTime > ((Input.GetKey(KeyCode.DownArrow) || dpadV < -0.6) ? quickFallTime : fallTime))
-            {
-                bool continueCheckingBreakers = false;
-                bool continueCheckingDowners = false;
-
-
-                foreach (Transform children in transform)
-                {
-                    int roundedX = Mathf.RoundToInt(children.transform.position.x);
-                    int roundedY = Mathf.RoundToInt(children.transform.position.y);
-                    if (roundedY > 0 && roundedY < height)
-                    { grid[roundedX, roundedY] = null; }
-                }
-                transform.position += new Vector3(0, -1f, 0);
-
-                if (!VaildMove())
-                {
-                    transform.position -= new Vector3(0, -1f, 0);
-                    AddToGridBlock(transform);
-                    canMove = false;
-                    continueCheckingDowners = CheckForDowners();
-
-                    if (!continueCheckingDowners)
-                    {
-                        CheckForBreakers();
-                        continueCheckingBreakers = DeleteList();
-                    }
-
-
-                    if (!continueCheckingDowners && !continueCheckingBreakers)
-                    {
-                        this.enabled = false;
-                        FindObjectOfType<GameController>().SpawnNewBlock(playerBelongs * (-1) + 1);
-
-                    }
-                }
-                previousTime = Time.time;
-            }
         }
     }
     void AddToGridBlock(Transform blockTransform)

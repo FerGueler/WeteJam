@@ -71,7 +71,7 @@ public class GameController : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.R) || Input.GetKeyDown(KeyCode.JoystickButton8)) 
+        if(Input.GetKeyDown(KeyCode.R) )// || Input.GetKeyDown(KeyCode.JoystickButton8)) 
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
