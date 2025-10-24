@@ -12,12 +12,19 @@ public class IntroConroller : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        PokiUnitySDK.Instance.init();
     }
 
     // Update is called once per frame
     void Update()
     {
+        //poki
+        if (AnyInput())
+        {
+            Load1Player();
+        }
+        //poki
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
@@ -48,4 +55,23 @@ public class IntroConroller : MonoBehaviour
         SceneManager.LoadScene(1);
 
     }
+
+    //poki
+    bool AnyInput()
+    {
+        // Keyboard
+        if (Input.anyKeyDown)
+            return true;
+
+        // Mouse
+        if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2))
+            return true;
+
+        // Touch (for mobile)
+        if (Input.touchCount > 0)
+            return true;
+
+        return false;
+    }
+    //poki
 }

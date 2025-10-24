@@ -54,6 +54,7 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
+        PokiUnitySDK.Instance.gameplayStart();
         Time.timeScale = 1f;
 
         if (numberOfPlayers==2) 
@@ -161,6 +162,7 @@ public class GameController : MonoBehaviour
             {
                 gameOver=true;
                 PlayGameOverSound();
+                PokiUnitySDK.Instance.gameplayStop();
                 return gameOver;
             }
         }
