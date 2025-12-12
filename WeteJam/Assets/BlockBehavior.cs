@@ -37,7 +37,7 @@ public class BlockBehavior : MonoBehaviour
     private Vector2 moveInput1;
     private bool fallQuickly = false;
     private bool fallQuickly1 = false;
-
+    public GameObject explosionPrefab;
     private void Awake()
     {
         controls1 = new PlayerControls();
@@ -736,8 +736,8 @@ public class BlockBehavior : MonoBehaviour
                 }
             }
         }
-        //quizás esta función debería ser del GameController o algo, pero como tenemos es de q el grid es static, no se
-        //loopear por todo el grid y preguntarle a cada pieza sus rules de breakeo (quizás llamarle a una funcion que tiene)
+        //quizï¿½s esta funciï¿½n deberï¿½a ser del GameController o algo, pero como tenemos es de q el grid es static, no se
+        //loopear por todo el grid y preguntarle a cada pieza sus rules de breakeo (quizï¿½s llamarle a una funcion que tiene)
     }
 
     void AddToDeleteList(Transform toDeleteItem)
@@ -936,6 +936,7 @@ public class BlockBehavior : MonoBehaviour
             {
                 int roundedX = Mathf.RoundToInt(toDeleteList[i].transform.position.x);
                 int roundedY = Mathf.RoundToInt(toDeleteList[i].transform.position.y);
+                Instantiate(explosionPrefab, toDeleteList[i].transform.position, Quaternion.identity);
                 grid[roundedX, roundedY] = null;
                 if(numberOfPlayers ==2)
                 {

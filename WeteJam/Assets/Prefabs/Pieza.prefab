@@ -61,6 +61,7 @@ MonoBehaviour:
   - {fileID: -783707394, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
   isInitialBlock: 0
   playerBelongs: 0
+  explosionPrefab: {fileID: 5024009746357069194, guid: ec3f674830402cc45bce805cf6493db7, type: 3}
 --- !u!114 &1377425249418148915
 MonoBehaviour:
   m_ObjectHideFlags: 0

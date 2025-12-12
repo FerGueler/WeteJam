@@ -8010,6 +8010,7 @@ MonoBehaviour:
   - {fileID: -783707394, guid: 6f682e10b041c39448f311d75d22223f, type: 3}
   isInitialBlock: 1
   playerBelongs: 0
+  explosionPrefab: {fileID: 0}
 --- !u!4 &5373812864575978054
 Transform:
   m_ObjectHideFlags: 0
